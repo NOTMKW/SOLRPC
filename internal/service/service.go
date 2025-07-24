@@ -5,13 +5,11 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"time"
 
 	Price "github.com/NOTMKW/RPC/internal/price"
 )
 
-func FetchSolanaPrice(apikey string) []int {
-	var price []int
+func FetchSolanaPrice(apikey string) *Price.SolanaPrice {
 	var body []byte
 	for i := 0; i < 10; i++ {
 		resp, err := http.Get("https://min-api.cryptocompare.com/data/price?fsym=SOL&tsyms=USD,EUR,BTC&api_key=" + apikey)
@@ -19,23 +17,22 @@ func FetchSolanaPrice(apikey string) []int {
 			log.Println("Error fetching Solana price:", err)
 			continue
 		}
-		body, err = io.ReadAll(resp.Body)
 		resp.Body.Close()
+		body, err = io.ReadAll(resp.Body)
 		if err != nil {
 			log.Println("Error reading response body:", err)
-			continue
+			return nil
 		}
-		time.Sleep(30 * time.Second)
 	}
 
 	var priceData Price.PriceResponse
 	if err := json.Unmarshal(body, &priceData); err != nil {
 		log.Fatal("Error parsing JSON:", err)
+		return nil
 	}
-
-	price = append(price, int(priceData.USD))
-	price = append(price, int(priceData.EUR))
-	price = append(price, int(priceData.BTC*100000))
-
-	return price
+	return &Price.SolanaPrice{
+		Usd: priceData.USD,
+		Eur: priceData.EUR,
+		Btc: priceData.BTC,
+	}
 }
