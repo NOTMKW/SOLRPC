@@ -16,7 +16,7 @@ func LoadConfig() *config {
 		log.Println("Error loading .env file")
 	}
 
-	apiKey := os.Getenv("API_KEY")
+	apiKey := os.Getenv("apikey")
 	if apiKey == "" {
 		log.Fatal("API key not found in environment variables")
 	}
@@ -34,12 +34,4 @@ func (c *config) GetApiKey(service string) string {
 	}
 	c.ApiKey[service] = key
 	return key
-}
-
-func (c *config) SetApiKey(key string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		log.Fatalf("API key %s not found in environment variables", key)
-	}
-	return value
 }
