@@ -13,8 +13,10 @@ import (
 func main() {
 	cfg := config.LoadConfig()
 	pricechanstruct := Price.SolanaPrice{}
-	pricechan := make(chan *Price.SolanaPrice, 10)
-	printer.NewPriceService(&pricechanstruct)
+	printerService := printer.NewPriceService(&pricechanstruct)
+
+	printerService.StartFetchingPrices()
+
 	go func() {
 		ticker := time.NewTicker(30 * time.Second)
 		defer ticker.Stop()
@@ -22,18 +24,20 @@ func main() {
 
 		if price, err := service.FetchSolanaPrice(apikey); err == nil {
 			log.Println("sending price to channel:")
-			pricechan <- price
+			printerService.PriceChannel <- price
 		} else {
 			log.Println("Failed to fetch Solana price:", err)
 		}
 		for range ticker.C {
 			if price, err := service.FetchSolanaPrice(apikey); err == nil {
 				log.Println("sending price to channel:")
-				pricechan <- price
+				printerService.PriceChannel <- price
 			} else {
 				log.Println("Failed to fetch Solana price:", err)
 			}
 		}
 		log.Println("Application started successfully")
 	}()
+
+	select {}
 }

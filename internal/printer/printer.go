@@ -7,25 +7,25 @@ import (
 )
 
 type NewPriceServicestruct struct {
-	priceChannel chan *Price.SolanaPrice
+	PriceChannel chan *Price.SolanaPrice
 }
 
 func NewPriceService(ch *Price.SolanaPrice) *NewPriceServicestruct {
-	return &NewPriceServicestruct{priceChannel: make(chan *Price.SolanaPrice)}
+	return &NewPriceServicestruct{PriceChannel: make(chan *Price.SolanaPrice)}
 }
 
 func (ps *NewPriceServicestruct) Start() {
-	ps.priceChannel = make(chan *Price.SolanaPrice)
+	ps.PriceChannel = make(chan *Price.SolanaPrice)
 }
 
 func (ps *NewPriceServicestruct) GetPriceChannel() chan<- *Price.SolanaPrice {
-	return ps.priceChannel
+	return ps.PriceChannel
 }
 
 func (ps *NewPriceServicestruct) StartFetchingPrices() {
 	go func() {
 		log.Println("Starting to fetch Solana prices...")
-		for price := range ps.priceChannel {
+		for price := range ps.PriceChannel {
 			ps.printPrice(price)
 		}
 	}()
